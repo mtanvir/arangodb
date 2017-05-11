@@ -257,7 +257,7 @@ function upsertSystemServices () {
   `);
 }
 
-function rebuildAllServiceBundles (updateDatabase, fixMissingChecksums) {
+function rebuildAllServiceBundles (fixMissingChecksums) {
   const servicesMissingChecksums = [];
   const collection = utils.getStorage();
   for (const serviceDefinition of collection.all()) {
@@ -265,8 +265,17 @@ function rebuildAllServiceBundles (updateDatabase, fixMissingChecksums) {
     if (mount.startsWith('/_')) {
       continue;
     }
-    if (!fs.exists(FoxxService.bundlePath(mount))) {
+    const bundlePath = FoxxService.bundlePath(mount);
+    const basePath = FoxxService.basePath(mount);
+
+    const hasBundle = fs.exists(bundlePath);
+    const hasFolder = fs.exists(basePath);
+    if (!hasBundle && hasFolder) {
       createServiceBundle(mount);
+    } else if (hasBundle && !hasFolder) {
+      extractServiceBundle(bundlePath, basePath);
+    } else if (!hasBundle && !hasFolder) {
+      continue;
     }
     if (fixMissingChecksums && !serviceDefinition.checksum) {
       servicesMissingChecksums.push({
@@ -683,7 +692,7 @@ function _prepareService (serviceInfo, options = {}) { // okay-ish
         const info = store.installationInfo(serviceInfo);
         const storeBundle = downloadServiceBundleFromRemote(info.url);
         try {
-          extractServiceBundle(storeBundle, tempServicePath, true);
+          extractServiceBundle(storeBundle, tempServicePath);
         } finally {
           try {
             fs.remove(storeBundle);
