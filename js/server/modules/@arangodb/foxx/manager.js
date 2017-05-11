@@ -537,8 +537,8 @@ function initLocalServiceMap () {
       const service = FoxxService.create(serviceDefinition);
       localServiceMap.set(service.mount, service);
     } catch (e) {
-      console.warn(`Failed to load service ${serviceDefinition.mount}`);
       if (fs.exists(FoxxService.basePath(serviceDefinition.mount))) {
+        console.error(`Failed to load service ${serviceDefinition.mount}`);
         let err = e;
         while (err) {
           if (err.stack) {
@@ -550,6 +550,8 @@ function initLocalServiceMap () {
           }
           err = err.cause;
         }
+      } else {
+        console.warn(`Could not find local service ${serviceDefinition.mount}`);
       }
     }
   }
