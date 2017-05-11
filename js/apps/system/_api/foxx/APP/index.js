@@ -519,3 +519,11 @@ localRouter.get('/checksums', (req, res) => {
   joi.array().items(schemas.mount),
   schemas.mount
 ));
+
+if (FoxxManager.isFoxxmaster()) {
+  localRouter.post('/heal', (req, res) => {
+    FoxxManager.heal();
+  });
+} else {
+  localRouter.post('/heal', FoxxManager.proxyToFoxxmaster);
+}

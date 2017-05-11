@@ -336,15 +336,31 @@ function healMyself () {
   }
 
   const coordinatorIds = getPeerCoordinatorIds();
+  let clusterIsInconsistent = false;
   for (const [mount, checksum] of servicesINeedToFix) {
     const coordIdsToTry = shuffle(coordinatorIds);
+    let found = false;
     for (const coordId of coordIdsToTry) {
       const bundle = downloadServiceBundleFromCoordinator(coordId, mount, checksum);
       if (bundle) {
         replaceLocalServiceFromTempBundle(mount, bundle);
+        found = true;
         break;
       }
     }
+    if (!found) {
+      clusterIsInconsistent = true;
+      break;
+    }
+  }
+
+  if (clusterIsInconsistent) {
+    const coordId = getFoxmasterCoordinatorId();
+    parallelClusterRequests([[
+      coordId,
+      'POST',
+      '/_api/foxx/_local/heal'
+    ]]);
   }
 }
 
@@ -1102,6 +1118,7 @@ exports.reloadInstalledService = reloadInstalledService;
 exports.ensureRouted = ensureServiceLoaded;
 exports.initializeFoxx = initLocalServiceMap;
 exports.ensureFoxxInitialized = ensureFoxxInitialized;
+exports.heal = healMyselfAndCoords;
 exports._startup = startup;
 exports._selfHeal = selfHeal;
 exports._createServiceBundle = createServiceBundle;
