@@ -50,14 +50,14 @@
   internal.loadStartup('server/bootstrap/autoload.js').startup();
   internal.loadStartup('server/bootstrap/routing.js').startup();
 
-  // startup the foxx manager once
-  if (internal.threadNumber === 0) {
+  // This script is also used by agents. Coords use a different script.
+  // Make sure we only run these commands in single-server mode.
+  if (internal.threadNumber === 0 && global.ArangoServerState.role() === 'SINGLE') {
+    // startup the foxx manager once
     require('@arangodb/foxx/manager')._startup(true);
     require('@arangodb/foxx/manager')._selfHeal(true);
-  }
 
-  // start the queue manager once
-  if (internal.threadNumber === 0) {
+    // start the queue manager once
     require('@arangodb/foxx/queues/manager').run();
   }
 
