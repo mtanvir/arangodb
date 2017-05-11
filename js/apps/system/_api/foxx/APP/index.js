@@ -472,6 +472,7 @@ localRouter.post((req, res) => {
     const coordIds = req.body[mount];
     result[mount] = FoxxManager._installLocal(mount, coordIds);
   }
+  FoxxManager._reloadRouting();
   res.json(result);
 })
 .body(joi.object());

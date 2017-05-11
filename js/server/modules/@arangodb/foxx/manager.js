@@ -886,7 +886,6 @@ function installLocal (mount, coordIds) {
     const filename = downloadServiceBundleFromCoordinator(coordId, mount);
     if (filename) {
       replaceLocalServiceFromTempBundle(mount, filename);
-      reloadRouting();
       return true;
     }
   }
