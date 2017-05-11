@@ -136,16 +136,24 @@ function parallelClusterRequests (requests) {
     }
     options.clientTransactionID = global.ArangoClusterInfo.uniqid();
     order.push(options.clientTransactionID);
+    let actualBody;
+    if (body) {
+      if (typeof body === 'string') {
+        actualBody = body;
+      } else if (body instanceof Buffer) {
+        if (body.length) {
+          actualBody = body;
+        }
+      } else {
+        actualBody = JSON.stringify(body);
+      }
+    }
     global.ArangoClusterComm.asyncRequest(
       method,
       `server:${coordId}`,
       db._name(),
       url,
-      body ? (
-        typeof body === 'string' || body instanceof Buffer
-        ? body
-        : JSON.stringify(body)
-      ) : undefined,
+      actualBody || undefined,
       headers || {},
       options
     );
