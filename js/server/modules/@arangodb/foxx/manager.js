@@ -396,7 +396,6 @@ function healMyselfAndCoords () {
       const myChecksum = safeChecksum(mount);
       if (myChecksum) {
         serviceChecksumsToUpdateInCollection.set(mount, myChecksum);
-        possibleSources.push(myId);
       } else {
         let found = false;
         for (const [coordId, coordChecksum] of coordsKnownToBeBadSources.get(mount)) {
