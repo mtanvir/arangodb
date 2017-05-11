@@ -488,9 +488,18 @@ localRouter.delete('/service', (req, res) => {
 .queryParam('mount', schemas.mount);
 
 localRouter.get('/status', (req, res) => {
-  res.json({
-    ready: global.KEY_GET('foxx', 'ready')
-  });
+  const ready = global.KEY_GET('foxx', 'ready');
+  if (ready || FoxxManager.isFoxxmaster()) {
+    res.json({ready});
+    return;
+  }
+  FoxxManager.proxyToFoxxmaster(req, res);
+  if (res.statusCode < 400) {
+    const result = JSON.parse(res.body.toString('utf-8'));
+    if (result.ready) {
+      global.KEY_SET('foxx', 'ready', result.ready);
+    }
+  }
 });
 
 localRouter.get('/checksums', (req, res) => {
