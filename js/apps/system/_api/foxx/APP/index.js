@@ -416,7 +416,6 @@ instanceRouter.post('/tests', (req, res) => {
 
 instanceRouter.get('/bundle', (req, res) => {
   const service = req.service;
-  console.warn(service.bundlePath, '==?', FoxxService.bundlePath(service.mount))
   if (!fs.isFile(service.bundlePath)) {
     if (!service.mount.startsWith('/_')) {
       res.throw(404, 'Bundle not available');
