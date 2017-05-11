@@ -402,12 +402,14 @@ function healMyselfAndCoords () {
           if (!coordChecksum) {
             continue;
           }
-          serviceChecksumsToUpdateInCollection.set(mount, coordChecksum);
-          possibleSources.push(coordId);
           const bundle = downloadServiceBundleFromCoordinator(coordId, mount, coordChecksum);
-          replaceLocalServiceFromTempBundle(mount, bundle);
-          found = true;
-          break;
+          if (bundle) {
+            serviceChecksumsToUpdateInCollection.set(mount, coordChecksum);
+            possibleSources.push(coordId);
+            replaceLocalServiceFromTempBundle(mount, bundle);
+            found = true;
+            break;
+          }
         }
         if (!found) {
           serviceMountsToDeleteInCollection.push(mount);
