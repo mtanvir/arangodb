@@ -100,6 +100,7 @@ installer.use(function (req, res, next) {
     } else {
       service = FoxxManager.install(appInfo, mount, options);
     }
+    // FIXME
   } catch (e) {
     if (e.isArangoError && [
       errors.ERROR_MODULE_FAILURE.code,
@@ -184,6 +185,7 @@ foxxRouter.delete('/', function (req, res) {
     teardown: runTeardown,
     force: true
   });
+  // FIXME
   res.json(Object.assign(
     {error: false},
     service.simpleJSON()
@@ -242,6 +244,7 @@ foxxRouter.patch('/config', function (req, res) {
   const configuration = req.body;
   const service = FoxxManager.lookupService(mount);
   FoxxManager.setConfiguration(mount, {configuration, replace: !service.isDevelopment});
+  // FIXME
   res.json(service.getConfiguration());
 })
 .body(joi.object().optional(), 'Configuration to apply.')
@@ -278,6 +281,7 @@ foxxRouter.patch('/deps', function (req, res) {
   const dependencies = req.body;
   const service = FoxxManager.lookupService(mount);
   FoxxManager.setDependencies(mount, {dependencies, replace: !service.isDevelopment});
+  // FIXME
   res.json(service.getDependencies());
 })
 .body(joi.object().optional(), 'Dependency options to apply.')
@@ -319,6 +323,7 @@ foxxRouter.patch('/devel', function (req, res) {
   const mount = decodeURIComponent(req.queryParams.mount);
   const activate = Boolean(req.body);
   res.json(FoxxManager[activate ? 'development' : 'production'](mount).simpleJSON());
+  // FIXME
 })
 .body(joi.boolean().optional())
 .summary('Activate/Deactivate development mode for a service')
