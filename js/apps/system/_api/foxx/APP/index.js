@@ -416,13 +416,14 @@ instanceRouter.post('/tests', (req, res) => {
 
 instanceRouter.get('/bundle', (req, res) => {
   const service = req.service;
+  console.warn(service.bundlePath, '==?', FoxxService.bundlePath(service.mount))
   if (!fs.isFile(service.bundlePath)) {
     if (!service.mount.startsWith('/_')) {
       res.throw(404, 'Bundle not available');
     }
     FoxxManager._createServiceBundle(service.mount);
   }
-  const checksum = `"${service.checksum}"`;
+  const checksum = `"${FoxxService.checksum(service.mount)}"`;
   if (req.get('if-none-match') === checksum) {
     res.status(304);
     return;
