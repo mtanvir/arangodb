@@ -202,11 +202,12 @@ function getChecksumsFromPeers (mounts) {
 
 // Startup and self-heal
 
-function startup (writeToDatabase) {
+function startup () {
   const db = require('internal').db;
   const dbName = db._name();
   try {
     db._useDatabase('_system');
+    const writeToDatabase = isFoxxmaster();
     const databases = db._databases();
     for (const name of databases) {
       try {
@@ -277,19 +278,20 @@ function rebuildAllServiceBundles (updateDatabase, fixMissingChecksums) {
   `);
 }
 
-function selfHeal (healTheWorld) {
+function selfHeal () {
   const db = require('internal').db;
   const dbName = db._name();
   try {
     db._useDatabase('_system');
     const databases = db._databases();
-    const foxxIsReady = isFoxxmasterReady();
+    const weAreFoxxmaster = isFoxxmaster();
+    const foxxmasterIsReady = weAreFoxxmaster || isFoxxmasterReady();
     for (const name of databases) {
       try {
         db._useDatabase(name);
-        if (healTheWorld) {
+        if (weAreFoxxmaster) {
           healMyselfAndCoords();
-        } else if (foxxIsReady) {
+        } else if (foxxmasterIsReady) {
           healMyself();
         }
       } catch (e) {
@@ -304,6 +306,7 @@ function selfHeal (healTheWorld) {
         }
       }
     }
+    return foxxmasterIsReady;
   } finally {
     db._useDatabase(dbName);
   }

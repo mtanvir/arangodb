@@ -60,8 +60,10 @@
         }
         require('@arangodb/tasks').unregister('self-heal');
         const isFoxxmaster = global.ArangoServerState.isFoxxmaster();
-        FoxxManager._selfHeal(isFoxxmaster);
-        global.KEY_SET('foxx', 'ready', true);
+        const foxxmasterIsReady = FoxxManager._selfHeal(isFoxxmaster);
+        if (foxxmasterIsReady) {
+          global.KEY_SET('foxx', 'ready', true);
+        }
       }
     });
     // start the queue manager once
