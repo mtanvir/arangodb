@@ -200,8 +200,8 @@ function getChecksumsFromPeers (mounts) {
   for (const [coordId, response] of zip(coordinatorIds, responses)) {
     const body = JSON.parse(response.body);
     const coordChecksums = new Map();
-    for (const mount of Object.keys(body)) {
-      coordChecksums.set(mount, body[mount]);
+    for (const mount of mounts) {
+      coordChecksums.set(mount, body[mount] || null);
     }
     peerChecksums.set(coordId, coordChecksums);
   }
