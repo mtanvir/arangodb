@@ -40,13 +40,15 @@ TEST_CASE("cache::PlainBucket", "[cache]") {
     auto bucket = std::make_unique<PlainBucket>();
     bool success;
 
-    uint32_t hashes[6] = {
-        1, 2, 3,
-        4, 5, 6};  // don't have to be real, but should be unique and non-zero
-    uint64_t keys[6] = {0, 1, 2, 3, 4, 5};
-    uint64_t values[6] = {0, 1, 2, 3, 4, 5};
-    CachedValue* ptrs[6];
-    for (size_t i = 0; i < 6; i++) {
+    uint32_t hashes[22];  // don't have to be real, but should be unique
+                          // and non-zero
+    uint64_t keys[22];
+    uint64_t values[22];
+    CachedValue* ptrs[22];
+    for (size_t i = 0; i < 22; i++) {
+      hashes[i] = i + 1;
+      keys[i] = i;
+      values[i] = i;
       ptrs[i] = CachedValue::construct(&(keys[i]), sizeof(uint64_t),
                                        &(values[i]), sizeof(uint64_t));
     }
@@ -56,29 +58,29 @@ TEST_CASE("cache::PlainBucket", "[cache]") {
 
     // insert five to fill
     REQUIRE(!bucket->isFull());
-    for (size_t i = 0; i < 5; i++) {
+    for (size_t i = 0; i < 21; i++) {
       bucket->insert(hashes[i], ptrs[i]);
-      if (i < 4) {
+      if (i < 20) {
         REQUIRE(!bucket->isFull());
       } else {
         REQUIRE(bucket->isFull());
       }
     }
-    for (size_t i = 0; i < 5; i++) {
+    for (size_t i = 0; i < 21; i++) {
       CachedValue* res =
           bucket->find(hashes[i], ptrs[i]->key(), ptrs[i]->keySize);
       REQUIRE(res == ptrs[i]);
     }
 
     // check that insert is ignored if full
-    bucket->insert(hashes[5], ptrs[5]);
-    CachedValue* res = bucket->find(hashes[5], ptrs[5]->key(), ptrs[5]->keySize);
+    bucket->insert(hashes[21], ptrs[21]);
+    CachedValue* res = bucket->find(hashes[21], ptrs[21]->key(), ptrs[21]->keySize);
     REQUIRE(nullptr == res);
 
     bucket->unlock();
 
     // cleanup
-    for (size_t i = 0; i < 6; i++) {
+    for (size_t i = 0; i < 22; i++) {
       delete ptrs[i];
     }
   }
@@ -135,13 +137,15 @@ TEST_CASE("cache::PlainBucket", "[cache]") {
     auto bucket = std::make_unique<PlainBucket>();
     bool success;
 
-    uint32_t hashes[6] = {
-        1, 2, 3,
-        4, 5, 6};  // don't have to be real, but should be unique and non-zero
-    uint64_t keys[6] = {0, 1, 2, 3, 4, 5};
-    uint64_t values[6] = {0, 1, 2, 3, 4, 5};
-    CachedValue* ptrs[6];
-    for (size_t i = 0; i < 6; i++) {
+    uint32_t hashes[22];  // don't have to be real, but should be unique
+                          // and non-zero
+    uint64_t keys[22];
+    uint64_t values[22];
+    CachedValue* ptrs[22];
+    for (size_t i = 0; i < 22; i++) {
+      hashes[i] = i + 1;
+      keys[i] = i;
+      values[i] = i;
       ptrs[i] = CachedValue::construct(&(keys[i]), sizeof(uint64_t),
                                        &(values[i]), sizeof(uint64_t));
     }
@@ -151,15 +155,15 @@ TEST_CASE("cache::PlainBucket", "[cache]") {
 
     // insert five to fill
     REQUIRE(!bucket->isFull());
-    for (size_t i = 0; i < 5; i++) {
+    for (size_t i = 0; i < 21; i++) {
       bucket->insert(hashes[i], ptrs[i]);
-      if (i < 4) {
+      if (i < 20) {
         REQUIRE(!bucket->isFull());
       } else {
         REQUIRE(bucket->isFull());
       }
     }
-    for (size_t i = 0; i < 5; i++) {
+    for (size_t i = 0; i < 21; i++) {
       CachedValue* res =
           bucket->find(hashes[i], ptrs[i]->key(), ptrs[i]->keySize);
       REQUIRE(res == ptrs[i]);
@@ -182,14 +186,14 @@ TEST_CASE("cache::PlainBucket", "[cache]") {
     REQUIRE(!bucket->isFull());
 
     // check that we can insert now after eviction optimized for insertion
-    bucket->insert(hashes[5], ptrs[5]);
-    res = bucket->find(hashes[5], ptrs[5]->key(), ptrs[5]->keySize);
-    REQUIRE(res == ptrs[5]);
+    bucket->insert(hashes[21], ptrs[21]);
+    res = bucket->find(hashes[21], ptrs[21]->key(), ptrs[21]->keySize);
+    REQUIRE(res == ptrs[21]);
 
     bucket->unlock();
 
     // cleanup
-    for (size_t i = 0; i < 6; i++) {
+    for (size_t i = 0; i < 22; i++) {
       delete ptrs[i];
     }
   }

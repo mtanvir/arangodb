@@ -48,7 +48,7 @@ struct PlainBucket {
   State _state;
 
   // actual cached entries
-  static constexpr size_t slotsData = 5;
+  static constexpr size_t slotsData = 21;
   uint32_t _cachedHashes[slotsData];
   CachedValue* _cachedData[slotsData];
 
