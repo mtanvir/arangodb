@@ -297,86 +297,26 @@ authRouter.get('/query/result/csv/:content', function (req, res) {
     res.throw('bad request', e.message, {cause: e});
   }
 
-  var json2csv = require('json2csv');
-  var fields = ['car', 'price', 'color'];
-  var myCars = [
-    {
-      "car": "Audi",
-      "price": 40000,
-      "color": "blue"
-    }, {
-      "car": "BMW",
-      "price": 35000,
-      "color": "black"
-    }, {
-      "car": "Porsche",
-      "price": 60000,
-      "color": "green"
+  const finalVal = content.map((row) => row.map((cell) => {
+    if (cell === null) {
+      return '';
     }
-  ];
-  var csv = json2csv({ data: myCars, fields: fields });
-  console.log(csv);
-  // http://stackoverflow.com/a/24922761/3917497 - slightly modified
-  /*
-  for (var i = 0; i < content.length; i++) {
-    var value = content[i];
-
-    for (var j = 0; j < value.length; j++) {
-      var innerValue;
-      if (typeof value[j] === 'object') {
-        innerValue = JSON.stringify(value[j]);
-      } else {
-        innerValue = value[j]===null?'':value[j].toString();
-      }
-      var result = innerValue.replace(/"/g, '""');
-      if (result.search(/("|,|\n)/g) >= 0)
-        result = '"' + result + '"';
-      if (j > 0)
-        finalVal += ',';
-      finalVal += result;
+    if (cell instanceof Date) {
+      cell = cell.toISOString();
     }
-
-    finalVal += '\n';
-  } */
-
-  var exportToCsv = function (rows) {
-    var processRow = function (row) {
-      var finalVal = '';
-      for (var j = 0; j < row.length; j++) {
-        var innerValue = row[j] === null ? '' : row[j].toString();
-        if (row[j] instanceof Date) {
-          innerValue = row[j].toLocaleString();
-        }
-        var result = innerValue.replace(/"/g, '""');
-        if (result.search(/("|,|\n)/g) >= 0) {
-          result = '"' + result + '"';
-        }
-        if (j > 0) {
-          finalVal += ',';
-        }
-        finalVal += result;
-      }
-      return finalVal + '\r\n';
-    };
-
-    var csvFile = '';
-    for (var i = 0; i < rows.length; i++) {
-      csvFile += processRow(rows[i]);
+    if (typeof cell === 'string') {
+      return `"${cell.replace(/"/g, '""')}"`;
     }
+    return cell;
+  }).join(',')).join('\r\n') + '\r\n';
 
-    return csvFile;
-  };
-  var finalVal = exportToCsv(content);
   console.log(finalVal);
-  // finalVal = csv;
 
- // res.headers['Content-disposition'] = 'attachment; filename=result.csv';
-  //res.headers['Content-Type'] = 'text/csv; charset=utf-8';
-  res.type('text/csv; charset=utf-8')
+  res.type('text/csv; charset=utf-8');
+  res.send(finalVal);
   res.attachment('result.csv');
-  res.write = finalVal;
 })
-//.response(['text/csv; charset=utf-8'])
+.response(['text/csv; charset=utf-8'])
 .summary('Starts a csv download.')
 .description(dd`
   This function returns the given binary as csv file download.
