@@ -1,4 +1,5 @@
 /* jshint browser: true */
+
 /* jshint unused: false */
 /* global Backbone, $, setTimeout, localStorage, ace, Storage, window, _, console, btoa */
 /* global _, arangoHelper, numeral, templateEngine, Joi */
@@ -73,6 +74,7 @@
       'click #explainQuery': 'explainQuery',
       'click #clearQuery': 'clearQuery',
       'click .outputEditorWrapper #downloadQueryResult': 'downloadQueryResult',
+      'click .outputEditorWrapper #downloadCsvResult': 'downloadCsvResult',
       'click .outputEditorWrapper .switchAce span': 'switchAce',
       'click .outputEditorWrapper .closeResult': 'closeResult',
       'click #toggleQueries1': 'toggleQueries',
@@ -453,13 +455,41 @@
       if (query !== '' && query !== undefined && query !== null) {
         var url;
         if (Object.keys(this.queriesHistory[counter].bindParam).length === 0) {
-          url = 'query/result/download/' + encodeURIComponent(btoa(JSON.stringify({ query: query })));
+          url = 'query/result/download/' + encodeURIComponent(btoa(JSON.stringify({
+            query: query
+          })));
         } else {
           url = 'query/result/download/' + encodeURIComponent(btoa(JSON.stringify({
             query: query,
             bindVars: this.queriesHistory[counter].bindParam
           })));
         }
+        arangoHelper.download(url);
+      } else {
+        arangoHelper.arangoError('Query error', 'Could not download the result.');
+      }
+    },
+
+    downloadCsvResult: function (e) {
+      var counter = $(e.currentTarget).attr('counter');
+      var array = [];
+
+      var newRow = [];
+      _.each($('#outputEditorWrapper' + counter + ' .arango-table tr'), function (row) {
+        _.each($(row).children(), function (elem) {
+          try {
+            newRow.push(JSON.parse($(elem).html()));
+          } catch (ignore) {
+            newRow.push($(elem).html());
+          }
+        });
+
+        array.push(newRow);
+        newRow = [];
+      });
+
+      if (array.length > 0) {
+        var url = 'query/result/csv/' + encodeURIComponent(btoa(JSON.stringify({array: array})));
         arangoHelper.download(url);
       } else {
         arangoHelper.arangoError('Query error', 'Could not download the result.');
@@ -1746,6 +1776,8 @@
             $('#outputEditorWrapper' + counter + ' .arangoToolbarTop').after(
               '<div id="outputTable' + counter + '" class="outputTable"></div>'
             );
+            // show csv download button
+            $('#outputEditorWrapper' + counter + ' #downloadCsvResult').show();
             $('#outputTable' + counter).show();
             self.renderOutputTable(result, counter);
 

@@ -287,6 +287,101 @@ authRouter.get('/job', function (req, res) {
   This function returns the job ids of all currently running jobs.
 `);
 
+authRouter.get('/query/result/csv/:content', function (req, res) {
+  let content;
+  try {
+    content = internal.base64Decode(req.pathParams.content);
+    content = JSON.parse(content);
+    content = content.array;
+  } catch (e) {
+    res.throw('bad request', e.message, {cause: e});
+  }
+
+  var json2csv = require('json2csv');
+  var fields = ['car', 'price', 'color'];
+  var myCars = [
+    {
+      "car": "Audi",
+      "price": 40000,
+      "color": "blue"
+    }, {
+      "car": "BMW",
+      "price": 35000,
+      "color": "black"
+    }, {
+      "car": "Porsche",
+      "price": 60000,
+      "color": "green"
+    }
+  ];
+  var csv = json2csv({ data: myCars, fields: fields });
+  console.log(csv);
+  // http://stackoverflow.com/a/24922761/3917497 - slightly modified
+  /*
+  for (var i = 0; i < content.length; i++) {
+    var value = content[i];
+
+    for (var j = 0; j < value.length; j++) {
+      var innerValue;
+      if (typeof value[j] === 'object') {
+        innerValue = JSON.stringify(value[j]);
+      } else {
+        innerValue = value[j]===null?'':value[j].toString();
+      }
+      var result = innerValue.replace(/"/g, '""');
+      if (result.search(/("|,|\n)/g) >= 0)
+        result = '"' + result + '"';
+      if (j > 0)
+        finalVal += ',';
+      finalVal += result;
+    }
+
+    finalVal += '\n';
+  } */
+
+  var exportToCsv = function (rows) {
+    var processRow = function (row) {
+      var finalVal = '';
+      for (var j = 0; j < row.length; j++) {
+        var innerValue = row[j] === null ? '' : row[j].toString();
+        if (row[j] instanceof Date) {
+          innerValue = row[j].toLocaleString();
+        }
+        var result = innerValue.replace(/"/g, '""');
+        if (result.search(/("|,|\n)/g) >= 0) {
+          result = '"' + result + '"';
+        }
+        if (j > 0) {
+          finalVal += ',';
+        }
+        finalVal += result;
+      }
+      return finalVal + '\r\n';
+    };
+
+    var csvFile = '';
+    for (var i = 0; i < rows.length; i++) {
+      csvFile += processRow(rows[i]);
+    }
+
+    return csvFile;
+  };
+  var finalVal = exportToCsv(content);
+  console.log(finalVal);
+  // finalVal = csv;
+
+ // res.headers['Content-disposition'] = 'attachment; filename=result.csv';
+  //res.headers['Content-Type'] = 'text/csv; charset=utf-8';
+  res.type('text/csv; charset=utf-8')
+  res.attachment('result.csv');
+  res.write = finalVal;
+})
+//.response(['text/csv; charset=utf-8'])
+.summary('Starts a csv download.')
+.description(dd`
+  This function returns the given binary as csv file download.
+`);
+
 authRouter.get('/graph/:name', function (req, res) {
   var _ = require('lodash');
   var name = req.pathParams.name;
