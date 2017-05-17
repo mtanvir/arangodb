@@ -314,6 +314,7 @@ authRouter.get('/query/result/csv/:content', function (req, res) {
 
   res.type('text/csv; charset=utf-8');
   res.send(finalVal);
+  console.log(3);
   res.attachment('result.csv');
 })
 .response(['text/csv; charset=utf-8'])
