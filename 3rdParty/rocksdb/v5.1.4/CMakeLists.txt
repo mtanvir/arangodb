@@ -450,6 +450,15 @@ set(SOURCES
         utilities/column_aware_encoding_util.cc
         $<TARGET_OBJECTS:build_version>)
 
+if(MSVC)
+else() #MSVC is an undefined variable and can not be negated
+  message(STATUS "enabling sse42 for rocksdb crc check: ${ARANGO_SSE42_FLAGS}")
+  set_source_files_properties(util/crc32c.cc 
+                              PROPERTIES
+                              COMPILE_FLAGS "${ARANGO_SSE42_FLAGS}"
+                             )
+endif()
+
 if(WIN32)
   list(APPEND SOURCES
     port/win/io_win.cc

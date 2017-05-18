@@ -580,6 +580,21 @@ endif ()
 # RocksDB
 # ------------------------------------------------------------------------------
 
+#THIS NEEDS TO HAPPEN BEFORE INCLUDING ROCKSDB
+#SSE42
+#detect SSE42
+
+if(ARANGO_SSE42)
+  if(MSVC)
+    set(ARANGO_SSE42_FLAGS "") #flag on windows not known
+                               #rocksdb does not support sse4.2 atm (2017-05-18)
+  else()
+    message("setting flags")
+    set(ARANGO_SSE42_FLAGS "-msse4")
+  endif()
+endif()
+
+
 add_subdirectory(3rdParty/rocksdb)
  
 add_definitions(-DARANGODB_ROCKSDB_VERSION=\"${ROCKSDB_VERSION}\")
