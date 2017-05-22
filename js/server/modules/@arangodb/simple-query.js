@@ -134,6 +134,8 @@ SimpleQueryByExample.prototype.execute = function () {
   var query = 'FOR doc IN @@collection ' + filters.join(' ') + ' ' +
     limitString(this._skip, this._limit) + ' RETURN doc';
 
+  console.error(query); //DEBUG:2283
+  console.error(bindVars); //DEBUG:2283
   var documents = require('internal').db._query({ query, bindVars}).toArray();
 
   this._execution = new GeneralArrayCursor(documents);
