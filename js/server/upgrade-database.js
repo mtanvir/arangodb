@@ -508,6 +508,7 @@
 
         // only add account if user has not created his/her own accounts already
         userManager.save('root', defaultRootPW, true);
+        console.error('This is the place ***************************************************'); //DEBUG:2283
         userManager.grantDatabase('root', '*', 'rw');
 
         return true;
